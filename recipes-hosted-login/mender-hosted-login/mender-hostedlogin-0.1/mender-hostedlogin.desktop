@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Mender Login
+Type=Application
+Path=/etc/mender/login
+Exec=/usr/bin/python /etc/mender/login/menderLogin.py
+Terminal=false
+
