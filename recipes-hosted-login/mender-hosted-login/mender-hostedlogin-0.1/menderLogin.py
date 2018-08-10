@@ -183,6 +183,8 @@ class LogInWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 # Add TenantToken entry
                 data["TenantToken"] = r.json()["tenant_token"]
+                # Ensure that URL is set correctly
+                data["ServerURL"] = self.url_base
                 # Write temporary conf
                 f_tmp = open("/tmp/mender.conf.tmp", "w+")
                 # Rewrite mender.conf
@@ -202,9 +204,10 @@ class LogInWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             # (Should not occur)
             os.makedirs("/etc/mender")
             try:
-                f = open("/etc/mender/mender.conf", "w+")
+                f = open("/tmp/mender.conf.tmp", "w")
                 # Create a new configuration holding the tenant token
-                data = {"TenantToken": r.json()["tenant_token"]}
+                data = {"TenantToken": r.json()["tenant_token"], \
+                        "ServerURL": self.url_base}
                 # Rewrite mender.conf
                 json.dump(data, f, indent=2)
             except:
@@ -218,6 +221,8 @@ class LogInWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # This is a bit hacky; maybe there's a better solution (TODO)
         os.system("sudo mv /tmp/mender.conf.tmp /etc/mender/mender.conf")
+        os.system("sudo mv /etc/xdg/autostart/mender-hostedlogin.desktop " + \
+                          "/etc/mender/login/mender-hostedlogin.desktop")
         # Token successfully written to /etc/mender.conf
         QtWidgets.QMessageBox.information(self, "Success",
                                           "Successfully stored your Hosted Mender token")
