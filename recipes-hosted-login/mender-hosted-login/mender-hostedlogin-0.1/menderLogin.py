@@ -172,6 +172,7 @@ class LogInWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             return
         f = None
         f_tmp = None
+        p_tmp = None
         data = {}
 
         # open mender.conf and add/rewrite tenant token
@@ -189,6 +190,15 @@ class LogInWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 f_tmp = open("/tmp/mender.conf.tmp", "w+")
                 # Rewrite mender.conf
                 json.dump(data, f_tmp, indent=2, sort_keys=True)
+
+                # Also write the tenant token to a persistent file
+                # this will be restored into mender.conf by the mender.service
+                # launch script.
+                p_tmp = open("/data/mender/hosted-mender-settings.dat", "w")
+                p_tmp.write(data["TenantToken"])
+                p_tmp.write("\n")
+                p_tmp.write(data["ServerURL"])
+                p_tmp.write("\n")
             except:
                 QtWidgets.QMessageBox.warning(self, "I/O Error",
                                               "Could not write token to /etc/mender.conf")
@@ -199,6 +209,8 @@ class LogInWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     f.close()
                 if f_tmp != None:
                     f_tmp.close()
+                if p_tmp != None:
+                    p_tmp.close()
 
         else: # not os.path.exists()
             # (Should not occur)
